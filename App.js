@@ -4,8 +4,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const HttpError = require('./models/http-error');
-const userRouter = require('./router/user');
-const user = require('./router/user');
+const userRouter = require('./router/user-router');
+const user = require('./router/user-router');
 
 
 const app = express();
