@@ -4,7 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const HttpError = require('./models/http-error');
-const userRouter = require('./router/user-router');
+const product = require('./router/product-router');
 const user = require('./router/user-router');
 
 
@@ -21,8 +21,9 @@ app.use((req, res, next) => {
   
     next();
   });
-
+  app.use(express.static('image'));
   app.use('/user', user);
+  app.use('/product', product);
 
   app.use((req, res, next) => {
     const error = new HttpError('Could not find this route.', 404);
