@@ -5,7 +5,30 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema({
     email: { type: String, required: true },
     password: { type: String, required: true },
-    productcard: [{type: Schema.Types.ObjectId, ref:'Product'}]
+    productcart: [
+      {
+        title : {type: String},
+        number: {type: Number},
+        price: {type: Number},
+        url: {type: String}
+     }
+    ],
+    productordering: [
+      {
+        title : {type: String},
+        number: {type: Number},
+        price: {type: Number},
+        url: {type: String}
+     }
+     ],
+     productfinished:[
+      {
+        title : {type: String},
+        number: {type: Number},
+        price: {type: Number},
+        url: {type: String}
+     }
+     ]
   });
   
   module.exports = mongoose.model('User', userSchema);

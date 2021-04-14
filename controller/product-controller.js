@@ -31,5 +31,6 @@ const getallproduct = async (req, res, next) =>{
   res.status(201).json(allproduct);
 };
 
+
 exports.registerproduct = registerproduct;
 exports.getallproduct = getallproduct;
