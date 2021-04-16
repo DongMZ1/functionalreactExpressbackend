@@ -51,6 +51,7 @@ const signup = async (req, res, next) =>{
 }
 
 
+
 const login = async (req, res, next) =>{
 
   const { email, password } = req.body;
@@ -87,20 +88,24 @@ const login = async (req, res, next) =>{
   const token = jwt.sign({email: email}, "secret_email");
   res
   .status(201)
-  .json({ email: existingUser.email, token: token});
+  .json({ email: existingUser.email, token: token, productcart: existingUser.productcart,
+    productordering: existingUser.productordering, productfinished: existingUser.productfinished
+  });
 
 }
 
+
+
+
 const addproducttocart = async (req, res, next) =>{
    const {title, email} = req.body;
-   const existingproduct = await Product.find({title: title});
-   const existinguser = User.find({email: email});
+   const existingproduct = await Product.findOne({title: title});
+   const existinguser = await User.findOne({email: email});
    /*if user have already add product to cart, then simply increase number, else push the product to cart array*/
-
-   let productinusercartindex = existinguser.productcart.indexOf({
-     title: existingproduct.title
-   });
-   if(productinusercartindex === -1){
+   let productincart = existinguser.productcart.filter(product => product.title === title);
+   
+   
+   if(productincart.length === 0){
     existinguser.productcart.push(
       {
         title: existingproduct.title,
@@ -109,20 +114,39 @@ const addproducttocart = async (req, res, next) =>{
         url: existingproduct.url
       }
     );
+     
+    await existinguser.save();
    }
-
-   if(productinusercartindex !== -1){
-        
+ 
+   if(productincart.length > 0){
+    productincart[0].number ++;
+    await existinguser.save();
    }
+   
 
    res
    .status(201)
-   .json({message: productinusercartindex});
+   .json({existinguser});
    
 }
 
 const removeproductfromcart = async (req, res, next) =>{
-  
+  const {title, email} = req.body;
+   const existingproduct = await Product.findOne({title: title});
+   const existinguser = await User.findOne({email: email});
+   let productincart = existinguser.productcart.filter(product => product.title === title);
+   if(productincart[0].number > 1){
+    productincart[0].number --;
+    await existinguser.save();
+   }
+   if(productincart[0].number === 1){
+    productincart[0].remove();
+    await existinguser.save();
+   }
+
+   res
+   .status(201)
+   .json({existinguser});
 }
 
 
@@ -130,3 +154,4 @@ const removeproductfromcart = async (req, res, next) =>{
 exports.signup = signup;
 exports.login = login;
 exports.addproducttocart = addproducttocart;
+exports.removeproductfromcart = removeproductfromcart;
