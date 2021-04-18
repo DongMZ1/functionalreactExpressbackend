@@ -111,7 +111,8 @@ const addproducttocart = async (req, res, next) =>{
         title: existingproduct.title,
         number: 1,
         price: existingproduct.price,
-        url: existingproduct.url
+        url: existingproduct.url,
+        checked: true
       }
     );
      
@@ -123,10 +124,9 @@ const addproducttocart = async (req, res, next) =>{
     await existinguser.save();
    }
    
-
    res
    .status(201)
-   .json({existinguser});
+   .json({data: existinguser.productcart});
    
 }
 
@@ -135,18 +135,30 @@ const removeproductfromcart = async (req, res, next) =>{
    const existingproduct = await Product.findOne({title: title});
    const existinguser = await User.findOne({email: email});
    let productincart = existinguser.productcart.filter(product => product.title === title);
-   if(productincart[0].number > 1){
+   if(productincart[0].number >= 1){
     productincart[0].number --;
     await existinguser.save();
    }
-   if(productincart[0].number === 1){
+   if(productincart[0].number == 0){
     productincart[0].remove();
     await existinguser.save();
    }
+  
 
    res
    .status(201)
-   .json({existinguser});
+   .json({data: existinguser.productcart});
+}
+
+const selectitemonchange = async (req, res, next) =>{
+  const {title, email, checked} = req.body;
+  const existinguser = await User.findOne({email: email});
+  let productincart = existinguser.productcart.filter(product => product.title === title);
+  productincart[0].checked = checked;
+  await existinguser.save();
+  res
+   .status(201)
+   .json({data: existinguser.productcart});
 }
 
 
@@ -155,3 +167,4 @@ exports.signup = signup;
 exports.login = login;
 exports.addproducttocart = addproducttocart;
 exports.removeproductfromcart = removeproductfromcart;
+exports.selectitemonchange= selectitemonchange;

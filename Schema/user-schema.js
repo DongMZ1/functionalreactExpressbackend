@@ -10,7 +10,8 @@ const userSchema = new Schema({
         title : {type: String},
         number: {type: Number},
         price: {type: Number},
-        url: {type: String}
+        url: {type: String},
+        checked: {type: Boolean}
      }
     ],
     productordering: [
