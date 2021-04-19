@@ -19,7 +19,8 @@ const userSchema = new Schema({
         title : {type: String},
         number: {type: Number},
         price: {type: Number},
-        url: {type: String}
+        url: {type: String},
+        date: {type: Date, default: Date.now()}
      }
      ],
      productfinished:[
@@ -27,7 +28,8 @@ const userSchema = new Schema({
         title : {type: String},
         number: {type: Number},
         price: {type: Number},
-        url: {type: String}
+        url: {type: String},
+        date: {type: Date, default: Date.now()}
      }
      ]
   });
