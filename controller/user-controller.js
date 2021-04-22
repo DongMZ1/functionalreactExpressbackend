@@ -1,9 +1,10 @@
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
-
 const HttpError = require('../models/http-error');
 const User = require('../Schema/user-schema');
 const Product = require('../Schema/product-schema');
+const uuid = require("uuid/v4");
+const stripe = require('stripe')('sk_test_51IhmDWJmnqfDDj8MLYaEVcAhsTuVtI8D9t5RGik1QIYjGhMiwRObGXt09zQVAN9aJC9Rcuib19L1heiQXJbWCDmu00wmLXqaUw')
 
 const signup = async (req, res, next) =>{
   const {email, password } = req.body;
@@ -150,6 +151,8 @@ const removeproductfromcart = async (req, res, next) =>{
    .json({data: existinguser.productcart});
 }
 
+
+
 const selectitemonchange = async (req, res, next) =>{
   const {title, email, checked} = req.body;
   const existinguser = await User.findOne({email: email});
@@ -163,8 +166,78 @@ const selectitemonchange = async (req, res, next) =>{
 
 
 
+const createcheckout = async (req, res, next) =>{
+  const {token, email, totalprice, productlist} = req.body;
+  let existingUser = await User.findOne({ email: email });
+  existingUser.productcart.filter(product => product.checked === true).map(product => {
+    existingUser.productordering.push(
+      {
+        title: product.title,
+        number: product.number,
+        price: product.price,
+        url: product.url,
+      }
+    )
+    existingUser.productcart.remove(product);
+  });
+
+let charge;
+  try {
+
+    const customer = await stripe.customers.create({
+      email: token.email,
+      source: token.id
+    });
+    const idempotencyKey = uuid();
+    charge = await stripe.charges.create(
+      {
+        amount:  totalprice,
+        currency: "usd",
+        customer: customer.id,
+        receipt_email: token.email,
+        description: `Purchased the ${JSON.stringify(productlist)}`,
+        shipping: {
+          name: token.card.name,
+          address: {
+            line1: token.card.address_line1,
+            line2: token.card.address_line2,
+            city: token.card.address_city,
+            country: token.card.address_country,
+            postal_code: token.card.address_zip
+          }
+        },
+         
+      }, {
+        idempotencyKey
+      }
+    );
+  }catch(err){
+    const error = new HttpError(err.message, 500);
+    return next(error); 
+  }
+  await existingUser.save();
+  res
+   .status(201)
+   .json({totalprice});
+}
+
+const getproductlist = async (req, res, next) =>{
+  const {email} = req.body;
+  const existingUser = await User.findOne({email: email});
+  res.status(200).json(
+    {
+      productcart: existingUser.productcart,
+      productordering: existingUser.productordering,
+      productfinished: existingUser.productfinished
+    }
+  )
+}
+
+
 exports.signup = signup;
 exports.login = login;
 exports.addproducttocart = addproducttocart;
 exports.removeproductfromcart = removeproductfromcart;
 exports.selectitemonchange= selectitemonchange;
+exports.createcheckout = createcheckout;
+exports.getproductlist = getproductlist;
