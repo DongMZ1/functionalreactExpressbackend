@@ -43,7 +43,7 @@ const signup = async (req, res, next) =>{
     return next(error);
   }
 
-  const token = jwt.sign({email: email}, "secret_email");
+  const token = jwt.sign({email: email}, "secret_email", { expiresIn: '15000' });
 
   res
     .status(201)
@@ -51,6 +51,18 @@ const signup = async (req, res, next) =>{
 
 }
 
+
+const localstorage = async (req, res, next) =>{
+  const {email} = req.user;
+  existingUser = await User.findOne({ email: email });
+
+  res
+  .status(201)
+  .json({productcart: existingUser.productcart,
+    productordering: existingUser.productordering, productfinished: existingUser.productfinished,
+    email: email
+  });
+}
 
 
 const login = async (req, res, next) =>{
@@ -86,7 +98,7 @@ const login = async (req, res, next) =>{
     return next(error);
   }
 
-  const token = jwt.sign({email: email}, "secret_email");
+  const token = jwt.sign({email: email}, "secret_email", { expiresIn: '15000' });
   res
   .status(201)
   .json({ email: existingUser.email, token: token, productcart: existingUser.productcart,
@@ -99,7 +111,8 @@ const login = async (req, res, next) =>{
 
 
 const addproducttocart = async (req, res, next) =>{
-   const {title, email} = req.body;
+   const {email} = req.user;
+   const {title} = req.body;
    const existingproduct = await Product.findOne({title: title});
    const existinguser = await User.findOne({email: email});
    /*if user have already add product to cart, then simply increase number, else push the product to cart array*/
@@ -132,7 +145,8 @@ const addproducttocart = async (req, res, next) =>{
 }
 
 const removeproductfromcart = async (req, res, next) =>{
-  const {title, email} = req.body;
+  const {email} = req.user;
+  const {title} = req.body;
    const existingproduct = await Product.findOne({title: title});
    const existinguser = await User.findOne({email: email});
    let productincart = existinguser.productcart.filter(product => product.title === title);
@@ -154,7 +168,8 @@ const removeproductfromcart = async (req, res, next) =>{
 
 
 const selectitemonchange = async (req, res, next) =>{
-  const {title, email, checked} = req.body;
+  const {email} = req.user;
+  const {title, checked} = req.body;
   const existinguser = await User.findOne({email: email});
   let productincart = existinguser.productcart.filter(product => product.title === title);
   productincart[0].checked = checked;
@@ -167,7 +182,8 @@ const selectitemonchange = async (req, res, next) =>{
 
 
 const createcheckout = async (req, res, next) =>{
-  const {token, email, totalprice, productlist} = req.body;
+  const {email} = req.user;
+  const {token, totalprice, productlist} = req.body;
   let existingUser = await User.findOne({ email: email });
   existingUser.productcart.filter(product => product.checked === true).map(product => {
     existingUser.productordering.push(
@@ -222,7 +238,7 @@ let charge;
 }
 
 const getproductlist = async (req, res, next) =>{
-  const {email} = req.body;
+  const {email} = req.user;
   const existingUser = await User.findOne({email: email});
   res.status(200).json(
     {
@@ -233,6 +249,12 @@ const getproductlist = async (req, res, next) =>{
   )
 }
 
+const tester = async (req, res, next) =>{
+  const {email} = req.user;
+  res.status(200).json(
+    {email}
+  )
+}
 
 exports.signup = signup;
 exports.login = login;
@@ -241,3 +263,5 @@ exports.removeproductfromcart = removeproductfromcart;
 exports.selectitemonchange= selectitemonchange;
 exports.createcheckout = createcheckout;
 exports.getproductlist = getproductlist;
+exports.localstorage = localstorage;
+exports.tester = tester;
