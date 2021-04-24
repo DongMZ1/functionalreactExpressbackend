@@ -43,7 +43,7 @@ const signup = async (req, res, next) =>{
     return next(error);
   }
 
-  const token = jwt.sign({email: email}, "secret_email", { expiresIn: '15000' });
+  const token = jwt.sign({email: email}, "secret_email", { expiresIn: '1h' });
 
   res
     .status(201)
@@ -98,7 +98,7 @@ const login = async (req, res, next) =>{
     return next(error);
   }
 
-  const token = jwt.sign({email: email}, "secret_email", { expiresIn: '15000' });
+  const token = jwt.sign({email: email}, "secret_email", { expiresIn: '1h' });
   res
   .status(201)
   .json({ email: existingUser.email, token: token, productcart: existingUser.productcart,
