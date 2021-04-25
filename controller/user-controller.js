@@ -5,7 +5,7 @@ const User = require('../Schema/user-schema');
 const Product = require('../Schema/product-schema');
 const uuid = require("uuid/v4");
 const stripe = require('stripe')('sk_test_51IhmDWJmnqfDDj8MLYaEVcAhsTuVtI8D9t5RGik1QIYjGhMiwRObGXt09zQVAN9aJC9Rcuib19L1heiQXJbWCDmu00wmLXqaUw')
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const signup = async (req, res, next) =>{
   const {email, password } = req.body;
