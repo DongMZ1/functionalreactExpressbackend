@@ -5,16 +5,18 @@ const User = require('../Schema/user-schema');
 const Product = require('../Schema/product-schema');
 const uuid = require("uuid/v4");
 const stripe = require('stripe')('sk_test_51IhmDWJmnqfDDj8MLYaEVcAhsTuVtI8D9t5RGik1QIYjGhMiwRObGXt09zQVAN9aJC9Rcuib19L1heiQXJbWCDmu00wmLXqaUw')
+const bcrypt = require('bcrypt');
 
 const signup = async (req, res, next) =>{
   const {email, password } = req.body;
+  const hashedpassword = await bcrypt.hash(password, 10);
 
    let existingUser;
   try {
     existingUser = await User.findOne({ email: email });
   } catch (err) {
     const error = new HttpError(
-      'Signing up failed, please try again later.',
+      'Database not initialized, please fix mongoDB.',
       500
     );
     return next(error);
@@ -30,14 +32,14 @@ const signup = async (req, res, next) =>{
 
   const createdUser = new User({
     email,
-    password,
+    password: hashedpassword,
   });
 
   try {
     await createdUser.save();
   } catch (err) {
     const error = new HttpError(
-      'Signing up failed, please try again later.',
+      'Save user failed, please try again later.',
       500
     );
     return next(error);
@@ -47,7 +49,7 @@ const signup = async (req, res, next) =>{
 
   res
     .status(201)
-    .json({ email: createdUser.email, password: createdUser.password, token: token});
+    .json({ email: createdUser.email, token: token});
 
 }
 
@@ -89,8 +91,8 @@ const login = async (req, res, next) =>{
     return next(error);
   }
 
-
-  if(password !== existingUser.password){
+  const passwordiscorrect = await bcrypt.compare(password, existingUser.password);
+  if(!passwordiscorrect){
     const error = new HttpError(
       'Password is not valid, please try again',
       403
