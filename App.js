@@ -43,7 +43,7 @@ app.use((req, res, next) => {
     `mongodb+srv://Pikachu:518dmz518@mycluster.7q3bi.mongodb.net/firstfunctionalapp?retryWrites=true&w=majority`
   )
   .then(() => {
-    app.listen(5000);
+    app.listen(process.env.PORT || 5000);
   })
   .catch(err => {
     console.log(err);
