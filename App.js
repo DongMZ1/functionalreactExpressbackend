@@ -21,7 +21,7 @@ app.use((req, res, next) => {
   
     next();
   });
-  app.use(express.static('image'));
+  app.use('/api/', express.static('image'));
   app.use('/api/user', user);
   app.use('/api/product', product);
 
