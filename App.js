@@ -22,8 +22,8 @@ app.use((req, res, next) => {
     next();
   });
   app.use(express.static('image'));
-  app.use('/user', user);
-  app.use('/product', product);
+  app.use('/api/user', user);
+  app.use('/api/product', product);
 
   app.use((req, res, next) => {
     const error = new HttpError('Could not find this route.', 404);
